@@ -10,7 +10,7 @@
 #define __design_patterns__Singleton__
 
 /** Meyers implementation. 
- * Q1: is it thread-safe? In C++11, it is, according to standard:
+ * Q1: is it thread-safe? In C++11, it IS indeed based on standard:
  * If control enters the declaration concurrently while the variable
  * is being initialized, the concurrent execution shall wait for 
  * completion of the initialization.
@@ -27,6 +27,8 @@ public:
     
 private:
     Singleton() {}
+    
+    // intentionally not implement copy constructor and assignment. they are meaningless for singleton right?
     Singleton (const Singleton &);
     void operator=(const Singleton &);
 };
