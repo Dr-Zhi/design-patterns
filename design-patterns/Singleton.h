@@ -9,8 +9,12 @@
 #ifndef __design_patterns__Singleton__
 #define __design_patterns__Singleton__
 
+#include <mutex>
+
+using std::mutex;
+
 /** Meyers implementation. 
- * Q1: is it thread-safe? In C++11, it IS indeed based on standard:
+ * Question: is it thread-safe? In C++11, it IS indeed based on standard:
  * If control enters the declaration concurrently while the variable
  * is being initialized, the concurrent execution shall wait for 
  * completion of the initialization.
@@ -28,9 +32,42 @@ public:
 private:
     Singleton() {}
     
-    // intentionally not implement copy constructor and assignment. they are meaningless for singleton right?
+    // intentionally not implement copy constructor and assignment.
+    // they are meaningless for singleton, right?
     Singleton (const Singleton &);
     void operator=(const Singleton &);
+};
+
+/** Single implemented in a double-checked locking way.
+ * It is strongly recommended using a static initializer (shown above).
+ * double-checked locking method is still not guaranteed thread-safe, and
+ * memory barrier is needed to further improve that.
+ * Ref:
+ * http://trevinca.ei.uvigo.es/~formella/doc/cd11/meyers-2004-perils.pdf
+ * http://docs.huihoo.com/ace_tao/double_checked_locking.html
+ * http://preshing.com/20130930/double-checked-locking-is-fixed-in-cpp11/
+ */
+class SingletonDLC {
+public:
+    static SingletonDLC * instance() {
+        if (s)
+            return s;
+        
+        mtx.lock();
+        if (!s) {
+            s = new SingletonDLC;
+        }
+        mtx.unlock();
+        return s;
+    }
+    
+private:
+    SingletonDLC();
+    SingletonDLC(const SingletonDLC &);
+    void operator=(const SingletonDLC &);
+
+    static SingletonDLC * s;
+    static mutex mtx;
 };
 
 #endif /* defined(__design_patterns__Singleton__) */
